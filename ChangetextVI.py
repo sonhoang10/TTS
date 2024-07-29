@@ -1,10 +1,11 @@
 import re  # Thư viện này dùng để lọc số thuộc dạng str
+import vietnam_number
 
 def changenumvi(textnumchange):
     units = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"]
     unitsmixfortens = ["", "mốt", "hai", "ba", "bốn", "lăm", "sáu", "bảy", "tám", "chín"]  # list này chỉnh sửa lại mốt và lăm khi đọc số chục vd bốn mươi mốt, chín mươi lăm
     tens = ["", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi"]
-    hundreds = ["", "một trăm", "hai trăm", "ba trăm", "bốn trăm", "năm trăm", "sáu trăm", "bảy trăm", "tám trăm", "chín trăm"]
+    hundreds = ["không trăm", "một trăm", "hai trăm", "ba trăm", "bốn trăm", "năm trăm", "sáu trăm", "bảy trăm", "tám trăm", "chín trăm"]
 
     # Mở rộng danh sách large_units
     large_units = ["", "nghìn", "triệu", "tỉ", "nghìn tỉ", "triệu tỉ", "tỉ tỉ", "nghìn tỉ tỉ", "triệu tỉ tỉ", "tỉ tỉ tỉ"]
@@ -32,7 +33,7 @@ def changenumvi(textnumchange):
         else:
             return hundreds[hundred] + " " + two_digit_number(rest)
 
-    def group_to_vietnamese(n, add_zero_hundred=False):  # 9 Hàm này dùng để gọi những hàm khác theo những điều kiện dưới
+    def group_to_vietnamese(n, add_zero_hundred):  # 9 Hàm này dùng để gọi những hàm khác theo những điều kiện dưới
         if n == 0:  # Nếu n == 0 trả về không gì cả
             return ""
         elif n < 100:  # Nếu n<100 gọi hàm two_digit_number() và với giá trị n
@@ -46,22 +47,22 @@ def changenumvi(textnumchange):
         if n == 0:
             return "không"  # Nếu số là 0, trả về "không"
 
-        parts = []  # Danh sách lưu trữ các phần của kết quả văn bản
+        list_of_number_change = []  # Danh sách lưu trữ các phần của kết quả văn bản
         unit_index = 0  # Chỉ số đơn vị lớn hiện tại (nghìn, triệu, tỉ, v.v.)
         add_zero_hundred = False
 
         while n > 0:  # Khi số còn lớn hơn 0
-            part = n % 1000  # Lấy phần cuối cùng của số (dưới 1000)
-            if part != 0 or (unit_index == 1 and parts) or (unit_index > 1 and part == 0 and parts):  # Điều kiện thêm để đọc số như 1018 là "một nghìn không trăm mười tám"
-                part_str = group_to_vietnamese(part, add_zero_hundred)  # 8 # Chuyển đổi phần này thành văn bản tiếng Việt
+            num = n % 1000  # Lấy phần cuối cùng của số (dưới 1000)
+            if num != 0:  # Điều kiện thêm để đọc số như 1018 là "một nghìn không trăm mười tám"
+                part_str = group_to_vietnamese(num, add_zero_hundred)  # 8 # Chuyển đổi phần này thành văn bản tiếng Việt
                 if large_units[unit_index] != "":  # Nếu đơn vị lớn hiện tại không phải là chuỗi rỗng
                     part_str += " " + large_units[unit_index]  # Thêm đơn vị lớn vào phần văn bản
-                parts.insert(0, part_str.replace("  ", " "))  # Chèn phần vào đầu danh sách `parts`, loại bỏ khoảng trắng dư thừa
+                list_of_number_change.insert(0, part_str.replace("  ", " "))  # Chèn phần vào đầu danh sách `parts`, loại bỏ khoảng trắng dư thừa
             n = n // 1000  # Cập nhật số bằng cách chia cho 1000
             unit_index += 1  # Tăng chỉ số đơn vị lớn để tìm trong large_units
-            add_zero_hundred = (unit_index > 1)
+            add_zero_hundred = (unit_index > 1 and num == 0)
 
-        return " ".join(parts).strip()  # Kết hợp các phần trong danh sách `parts` thành một chuỗi văn bản và loại bỏ khoảng trắng thừa
+        return " ".join(list_of_number_change).strip()  # Kết hợp các phần trong danh sách `parts` thành một chuỗi văn bản và loại bỏ khoảng trắng thừa
 
     # Hàm thay thế số trong văn bản bằng từ
     def replace_numbers_with_words(text):  # 3
