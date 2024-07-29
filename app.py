@@ -113,7 +113,6 @@ def predict(
 
     try:
         metrics_text = ""
-        t_latent = time.time()
 
         try:
             (
